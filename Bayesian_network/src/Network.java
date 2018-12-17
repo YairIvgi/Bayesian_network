@@ -1,24 +1,39 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class represent the bayesian network in a data structure and able to do actions on it
+ * @author Yair Ivgi
+ */
 public class Network {
 
 	private  Map<String,Node> nodesMap;
 	private  List<Node> nodes;
 	private  List<Query>  queries;
+	private List<Result> results;
 
 	public Network(){
 		nodes = new ArrayList<Node>();
 		queries = new ArrayList<Query>();
 		nodesMap = new HashMap<String,Node>();
+		results = new ArrayList<Result>();
 	}
 	
+	/**
+	 * this method reads the network from a designated file and phrase it to the data structure 
+	 * @author Yair Ivgi
+	 * @return void
+	 * @throws Exception
+	 */
 	public  void readFile(String fileName) throws Exception{
 		File file  =new File(fileName);
 		try {
@@ -88,19 +103,27 @@ public class Network {
 		}
 
 	}
-
+	
+	/**
+	 * this method handles the different algorithm requirement from the file
+	 * @author Yair Ivgi
+	 * @return void
+	 * @throws Exception
+	 */
 	public void executeQueries() throws Exception{	
 		Algorithms a =new Algorithms(nodes);
 		for (int i = 0; i < queries.size(); i++) {
 			switch (queries.get(i).getAlgoType()) {
 				case 1:
-					System.out.println("result = "+a.calculate1(queries.get(i)));
+					results.add(a.calculate1(queries.get(i)));
+				//	System.out.println("result = "+a.calculate1(queries.get(i)));
 					continue;
 				case 2:
-	//				a.calculate2(queries.get(i));
+					//results.add(a.calculate2(queries.get(i)));
 					continue;
 				case 3:
-					a.calculate3(queries.get(i));
+					//results.add(a.calculate3(queries.get(i)));
+
 					continue;
 				default:
 					continue;
@@ -108,8 +131,19 @@ public class Network {
 		}
 	}
 	
-	public static void writeFile(){
-		
+	/**
+	 * this method writs the results to the output file
+	 * @author Yair Ivgi
+	 * @return void
+	 * @throws IOException
+	 */
+	public void writeFile() throws IOException{
+		 BufferedWriter writer = new BufferedWriter(new FileWriter("output.txt"));
+		    for(Result res : results){
+		    	writer.write(res.toString());
+		    	writer.newLine();
+		    }
+		    writer.close();
 	}
 
 	public  void print(){

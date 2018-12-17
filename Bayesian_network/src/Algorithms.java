@@ -16,8 +16,8 @@ public class Algorithms{
 	}
 
 	/**
-	 * @author Yair Ivgi
 	 * this is the first algorithm
+	 * @author Yair Ivgi
 	 * @return double
 	 * @throws Exception
 	 */
