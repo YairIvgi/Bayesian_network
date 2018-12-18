@@ -27,7 +27,7 @@ public class Network {
 		nodesMap = new HashMap<String,Node>();
 		results = new ArrayList<Result>();
 	}
-	
+
 	/**
 	 * this method reads the network from a designated file and phrase it to the data structure 
 	 * @author Yair Ivgi
@@ -103,34 +103,32 @@ public class Network {
 		}
 
 	}
-	
+
 	/**
 	 * this method handles the different algorithm requirement from the file
 	 * @author Yair Ivgi
 	 * @return void
 	 * @throws Exception
 	 */
-	public void executeQueries() throws Exception{	
-		Algorithms a =new Algorithms(nodes);
+	public void executeQueries() throws Exception{
+		Algorithms a =new Algorithms(nodes);	
 		for (int i = 0; i < queries.size(); i++) {
 			switch (queries.get(i).getAlgoType()) {
-				case 1:
-					results.add(a.calculate1(queries.get(i)));
-				//	System.out.println("result = "+a.calculate1(queries.get(i)));
-					continue;
-				case 2:
-					//results.add(a.calculate2(queries.get(i)));
-					continue;
-				case 3:
-					//results.add(a.calculate3(queries.get(i)));
-
-					continue;
-				default:
-					continue;
+			case 1:
+				//		results.add(a.calculate1(queries.get(i)));	
+				continue;
+			case 2:
+				results.add(a.calculate2(queries.get(i)));
+				continue;
+			case 3:
+				results.add(a.calculate3(queries.get(i)));
+				continue;
+			default:
+				continue;
 			}
 		}
 	}
-	
+
 	/**
 	 * this method writs the results to the output file
 	 * @author Yair Ivgi
@@ -138,12 +136,12 @@ public class Network {
 	 * @throws IOException
 	 */
 	public void writeFile() throws IOException{
-		 BufferedWriter writer = new BufferedWriter(new FileWriter("output.txt"));
-		    for(Result res : results){
-		    	writer.write(res.toString());
-		    	writer.newLine();
-		    }
-		    writer.close();
+		BufferedWriter writer = new BufferedWriter(new FileWriter("output.txt"));
+		for(Result res : results){
+			writer.write(res.toString());
+			writer.newLine();
+		}
+		writer.close();
 	}
 
 	public  void print(){

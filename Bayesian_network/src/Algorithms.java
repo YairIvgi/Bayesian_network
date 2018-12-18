@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -22,48 +21,51 @@ public class Algorithms{
 	 * @throws Exception
 	 */
 	public Result calculate1(Query q) throws Exception {
-		double v1 = 0,v2 = 0;
-		Result result =new Result();
-		List<Vnode> evidence =new ArrayList<Vnode>();
-		evidence = q.getEvidence();
-		v1 = probabilistic(q.getSubject(),evidence,result);
-		List<String> values =q.getSubject().getNode().getValues();
-		if(values.size() > 1){
-			for(String val : values){
-				if(!val.equals(q.getSubject().getValue())){
-					Vnode vn =new Vnode(q.getSubject().getNode(),val);
-					v2 += probabilistic(vn,evidence,result);
-				}
-			}
-		}
-		result.setPropability(v1 *(1/(v2+v1)));
-		result.setAddition(result.getAddition()+1);
-		return result;
+//		double v1 = 0,v2 = 0;
+//		Result result =new Result();
+//		List<Vnode> evidence =new ArrayList<Vnode>();
+//		evidence = q.getEvidence();
+//		v1 = probabilistic(q.getSubject(),evidence,result);
+//		List<String> values =q.getSubject().getNode().getValues();
+//		if(values.size() > 1){
+//			for(String val : values){
+//				if(!val.equals(q.getSubject().getValue())){
+//					Vnode vn =new Vnode(q.getSubject().getNode(),val);
+//					v2 += probabilistic(vn,evidence,result);
+//				}
+//			}
+//		}
+//		result.setPropability(v1 *(1/(v2+v1)));
+//		result.setAddition(result.getAddition()+1);
+//		return result;
+		return null;
 	}
 
 	/**
 	 * this is the second algorithm
 	 * @author Yair Ivgi
 	 * @return double
-	 * @throws Exception
 	 */
 
-	public double calculate2(Query q) {
-		List<Node> qNodes =new ArrayList<Node>();
-		qNodes.addAll(nodes);
-		q.getEvidence().add(q.getSubject());
-		List<Node> hidden =new ArrayList<Node>();
-		hidden.addAll(Util.hiddenNodes(nodes, q.getEvidence()));	 //get all the hidden nodes of the query
-		Collections.sort(hidden,new alphabeticalComparator());  	//sort all the hidden Nodes
-		qNodes.removeAll(hidden);
-		for(Node hid : hidden){
-			//		hid.print();
-			JoinNodes(hid,qNodes);			//join all the nodes that has the hid node in the their evidence
-			hid.eliminate();				//eliminate the hid variable
-			qNodes.add(hid);
-			hidden.remove(hid);
-		}
-		return 0.0;
+	public Result calculate2(Query q) {
+		Result result =new Result();
+		List<Node> qNodes =new ArrayList<Node>();	//all the nodes
+		List<Vnode> qRelevant =q.getEvidence();		//all the query nodes
+		qNodes.addAll(nodes);						
+		qRelevant.add(q.getSubject());				//add the subject to the list of nodes that appear in the query
+		qNodes = Node.removeNotRelaventNodes(qRelevant);	//remove all the nodes that are not relevant to the query 
+		
+//		List<Node> hidden =new ArrayList<Node>();		
+//		hidden.addAll(Util.hiddenNodes(qNodes,qRelevant));	 //get all the hidden nodes of the query
+//		Collections.sort(hidden,new alphabeticalComparator());  	//sort all the hidden Nodes
+//		qNodes.removeAll(hidden);
+//		for(Node hid : hidden){
+//			//		hid.print();
+//			JoinNodes(hid,qNodes);			//join all the nodes that has the hid node in the their evidence
+//			qNodes.add(hid);
+//			hidden.remove(hid);
+//		}
+		return result;
 	}
 
 	/**
@@ -85,6 +87,7 @@ public class Algorithms{
 		if(joinedNodes.size() > 0){
 			hid = CPT.joinCpt(joinedNodes,hid);
 		}
+		hid.eliminate();				//eliminate the hid variable
 	}
 
 	/**
@@ -94,8 +97,8 @@ public class Algorithms{
 	 * @throws Exception
 	 */
 
-	public double calculate3(Query q) {
-		return 0.0;
+	public Result calculate3(Query q) {
+		return null;
 	}
 
 	/**

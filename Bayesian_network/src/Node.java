@@ -25,7 +25,7 @@ public class Node{
 	public void addJoinedNode(String name){
 		joinedNodes.add(name);
 	}
-	
+
 	public List<String> getJoinedNodes() {
 		return joinedNodes;
 	}
@@ -47,7 +47,7 @@ public class Node{
 	}
 
 	public void addParent(Node node){
-			parents.add(node);
+		parents.add(node);
 	}
 
 	public void addCPT(String line){
@@ -74,6 +74,12 @@ public class Node{
 			System.out.println("\n");
 		}
 	}
+
+	/**
+	 * This method checks if two Nodes are equal
+	 * @author Yair Ivgi
+	 * @return boolean
+	 */
 	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Node)){
@@ -88,12 +94,60 @@ public class Node{
 
 	void eliminate() {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	/**
+	 * This method removes the non relevant nodes to the specific query from the bayesian network   
+	 * @author Yair Ivgi
+	 * @return List<Node>
+	 */
+	public static List<Node> removeNotRelaventNodes(List<Vnode> query) {
+		List<Node> qList = new ArrayList<Node>();
+		List<Node> parents = new ArrayList<Node>();
+		for(Vnode vn : query){
+			qList.add(vn.getNode());
+		}
+		for(Node n : qList){
+			List<Node> nodes = new ArrayList<Node>();
+			parents.addAll(n.recursive(nodes));
+		}
+		qList.addAll(parents);
+		return getDistinctList(qList);
+	}
+
+	/**
+	 * This method recurse on the ancestors of a specific node and returns them   
+	 * @author Yair Ivgi
+	 * @return List<Node>
+	 */
+	public List<Node> recursive(List<Node> nodes){
+		if(! (this.getParents().size()==0)){
+			for(Node n : this.getParents()){
+				nodes.add(n);
+				n.recursive(nodes);
+			}
+		}
+		return nodes;
+	}
+	
+	/**
+	 * This method returns a distinct list from a list of nodes    
+	 * @author Yair Ivgi
+	 * @return List<Node>
+	 */
+	private static List<Node> getDistinctList(List<Node> list){
+		List<Node> listDistinct = new ArrayList<>();
+		for(Node i : list){
+			if( !listDistinct.contains(i)){
+				listDistinct.add(i); }
+		}
+		return listDistinct;
 	}
 }
 
 /**
- *compare alphabetically two Nodes
+ *class that implements comparator and compare alphabetically list of nodes
  *@author Yair Ivgi
  */
 
