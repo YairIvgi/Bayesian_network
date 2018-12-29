@@ -17,6 +17,19 @@ public class CPT {
 	valueP = new ArrayList<ValueP>();
 	dependenc = new ArrayList<Vnode>();
     }
+    
+    public CPT(CPT cpt){
+   	this.parents = cpt.parents;
+   	this.values = cpt.values;
+   	valueP = new ArrayList<ValueP>();
+   	for(ValueP vp : cpt.getValueP()){
+   	    valueP.add(new ValueP(vp));
+   	}
+   	dependenc = new ArrayList<Vnode>();
+   	for(Vnode vn : cpt.getDependenc()){
+   	    dependenc.add(new Vnode(vn));
+   	}
+       }
 
     public void addCPT(String line){
 	List<String> tempCPT = Arrays.asList(line.split(","));
@@ -96,9 +109,4 @@ public class CPT {
 	return result;
     }
 
-//    /**
-//     * This method join all the CPT tables of the Nodes in the list and then with the hidden Node
-//     * @author Yair Ivgi
-//     * @return Node
-//     */
 }

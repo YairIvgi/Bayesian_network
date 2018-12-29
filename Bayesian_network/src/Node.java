@@ -28,6 +28,23 @@ public class Node{
 	cpt =new ArrayList<CPT>();
     }
 
+    public Node(Node node){
+	this.name=node.name;
+	this.isHidden = node.isHidden;
+	parents =new ArrayList<Node>();
+	for(Node n: node.getParents()){
+	    parents.add(new Node(n));
+	}
+	values =new ArrayList<String>();
+	for(String s : node.getValues()){
+	    values.add(new String(s));
+	}
+	cpt =new ArrayList<CPT>();
+	for(CPT cpt : node.getCPT()){
+	    this.cpt.add(new CPT(cpt));
+	}
+    }
+
     public List<Node> getParents(){ return parents;} 
 
     public List<String> getValues(){ return values;}
@@ -54,25 +71,25 @@ public class Node{
 	cpt.add(c);
     }
 
-//    public void print(){
-//	System.out.println(name);
-//	System.out.print("Values: ");
-//	for(String s : values){
-//	    System.out.print(s+",");
-//	}
-//	System.out.println();
-//	System.out.print("Parents: ");
-//	for(Node s : parents){
-//	    System.out.print(s.getName()+",");
-//	}
-//	System.out.println();
-//	System.out.println("CPT: ");
-//	for(CPT c : cpt){
-//	    c.printCpt();
-//	    System.out.println("\n");
-//	}
-//    }
-    
+    //    public void print(){
+    //	System.out.println(name);
+    //	System.out.print("Values: ");
+    //	for(String s : values){
+    //	    System.out.print(s+",");
+    //	}
+    //	System.out.println();
+    //	System.out.print("Parents: ");
+    //	for(Node s : parents){
+    //	    System.out.print(s.getName()+",");
+    //	}
+    //	System.out.println();
+    //	System.out.println("CPT: ");
+    //	for(CPT c : cpt){
+    //	    c.printCpt();
+    //	    System.out.println("\n");
+    //	}
+    //    }
+
     public void print2(){
 	System.out.println(name);
     }

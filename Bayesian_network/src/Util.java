@@ -39,8 +39,6 @@ public class Util {
 	return res;
     }
 
-
-
     /** 
      * This function returns a list of Vnode all the permutation of the nodes and values.
      * @author Yair Ivgi
@@ -76,7 +74,6 @@ public class Util {
 	}
 	return res; 
     }
-
 
     /** 
      * This function returns a list of Vnode all the permutation of the nodes and values.

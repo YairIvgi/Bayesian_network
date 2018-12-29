@@ -13,6 +13,11 @@ public class Vnode {
 		this.value =value;
 	}
 
+	public Vnode(Vnode vn) {
+	    this.node = vn.node;
+		this.value =vn.value;
+	}
+
 	public Node getNode() {
 		return node;
 	}

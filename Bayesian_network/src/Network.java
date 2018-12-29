@@ -115,18 +115,21 @@ public class Network {
 	for (int i = 0; i < queries.size(); i++) {
 	    switch (queries.get(i).getAlgoType()) {
 	    case 1:
-		//	results.add(a.calculate1(queries.get(i)));	
+		results.add(a.calculate1(queries.get(i)));	
 		continue;
 	    case 2:
 		results.add(a.calculate2(queries.get(i)));
 		continue;
 	    case 3:
-		//	results.add(a.calculate3(queries.get(i)));
+		results.add(a.calculate3(queries.get(i)));
 		continue;
 	    default:
 		continue;
 	    }
 	}
+//	for(Result res : results){
+//	    System.out.println(res);
+//	}
     }
 
     /**
@@ -144,15 +147,15 @@ public class Network {
 	writer.close();
     }
 
-//    public  void print(){
-//	for (int i = 0; i < nodes.size(); i++) {
-//	    nodes.get(i).print();
-//	    System.out.println();
-//	}
-//	System.out.println("Queries: ");
-//	for (int i = 0; i < queries.size(); i++) {
-//	    queries.get(i).print();
-//	    System.out.println();
-//	}
-//    }
+    //    public  void print(){
+    //	for (int i = 0; i < nodes.size(); i++) {
+    //	    nodes.get(i).print();
+    //	    System.out.println();
+    //	}
+    //	System.out.println("Queries: ");
+    //	for (int i = 0; i < queries.size(); i++) {
+    //	    queries.get(i).print();
+    //	    System.out.println();
+    //	}
+    //    }
 }

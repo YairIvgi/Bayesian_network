@@ -36,5 +36,5 @@ public class Result {
 		NumberFormat formatter = new DecimalFormat("#0.00000");
 		propability = propability *1.00000;
 		return  formatter.format(propability)+","+addition+","+multiplication;
-	}	
+	}
 }

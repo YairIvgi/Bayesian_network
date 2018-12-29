@@ -49,93 +49,328 @@ public class Algorithms{
     public Result calculate2(Query q) {
 	Result result =new Result();
 	List<Node> qNodes =new ArrayList<Node>();	//all the nodes
-	List<Vnode> qRelevant =q.getEvidence();		//all the query nodes
-	qNodes.addAll(nodes);						
-	qRelevant.add(q.getSubject());				//add the subject to the list of nodes that appear in the query
-	qNodes = Node.removeNotRelaventNodes(qRelevant);	//remove all the nodes that are not relevant to the query 		
+	List<Vnode> qRelevant =new ArrayList<Vnode>();		//all the query nodes
+	qRelevant.addAll(q.getEvidence());
+	qRelevant.add(q.getSubject());	//add the subject to the list of nodes that appear in the query				
+	for(Node node : Node.removeNotRelaventNodes(qRelevant)){	//remove all the nodes that are not relevant to the query
+	    qNodes.add(new Node(node));
+	}
 	Util.setHiddenNodes(qNodes,qRelevant);	 //set all the hidden nodes of the query
 	Collections.sort(qNodes,new alphabeticalComparator());  	//sort all the hidden Nodes
 	List<NodeTable> tables = new ArrayList<NodeTable>();
-
 	for(Node node : qNodes){
 	    NodeTable table =new NodeTable();
 	    tables.add(table);
-	    buildTable(table,node);
+	    buildTable(table,node,q);
 	    table.setHidden(node.isHidden());
-	    table.print();
-	}	    
-	System.out.println("+++++++++++++++++++++++++++++++++++");
-
-
-		boolean isFinished = false;
-		while(!isFinished){
-		    isFinished = true;
-		    for(NodeTable nt : tables){
-			if(nt.isHidden() && !nt.isHandled()){
-			    JoinNodesAndEliminate(tables, nt);
-			    nt.setHandled(true);
-			    isFinished = false;
-			    break;
-			}
-		    }
+	}
+	boolean isFinished = false;
+	while(!isFinished){
+	    isFinished = true;
+	    for(NodeTable nt : tables){
+		if(nt.isHidden()){		    /// && !nt.isHandled()
+		    NodeTable combTable = JoinTableList(tables, nt,result,q);
+		    eliminate(combTable,nt.getNodeName());				
+		    tables.add(combTable);
+		    nt.setHandled(true);
+		    isFinished = false;
+		    break;
 		}
-		//TODO write the method
-		//combineTables(tables);
+	    }
+	}
+	NodeTable res =new NodeTable();
+	if(tables.size()==1){
+	    res = tables.get(0);
+	}else{
+	    NodeTable combTable =new NodeTable();
+	    while(true){
+		for(NodeTable nt : tables){
+		    Collections.sort(tables,new factorSize());
+		    combTable = JoinTableList(tables, nt,result,q);
+		    if(combTable==null){
+			break;						
+		    }
+		    if(combTable.getEvidence().size()>2){		
+			eliminate(combTable,nt.getNodeName());
+		    }
+		    tables.add(combTable);
+
+		    break;
+		}
+		if(tables.size()==1){
+		    res = tables.get(0);
+		    break;
+		}
+	    }
+	}
+	res.normalize(result);
+	for(Row row : res.getRows()){
+	    if(row.getVnodes().contains(q.getSubject())){
+		result.setPropability(row.getPropbility());
+	    }
+	}
 	return result;
     }
+
 
     /**
      * This method joins all the appearances of the hidden node in the network by the V.E algorithm
      * @author Yair Ivgi
+     * @param q 
      * @return void
      */
-    private void JoinNodesAndEliminate(List<NodeTable> tables, NodeTable nt) {
+    private NodeTable JoinTableList(List<NodeTable> tables, NodeTable nt, Result result, Query q) {		
 	List<NodeTable> outTables = new ArrayList<NodeTable>();
 	List<NodeTable> relTables = new ArrayList<NodeTable>();
 	for(NodeTable table : tables){
-	    //TODO write the function
-	    if(!isRelavantTable(table,nt)){
-		outTables.add(table);
-	    }else{
-		relTables.add(table);
+	    if(!table.isHandled()){
+		if(!isRelavantTable(table,nt)){
+		    if(!table.equals(nt)){
+			outTables.add(table);
+		    }
+		}else{
+		    relTables.add(table);
+		}
 	    }
 	}
+	if(relTables.size()==0){
+	    tables.clear();
+		tables.addAll(outTables);
+		return null;
+	}
+	Collections.sort(relTables,new factorSize());  	//sort all the tables by the factor size
 	NodeTable combTable = new NodeTable();
-	outTables.add(combTable);
-
-	//TODO build combTable
-
-	//TODO write eliminate
+	boolean hiddenCombe =false;		
+	List<String> hidNames =new ArrayList<String>();
+	if(relTables.size() > 0){
+	    combTable = relTables.get(0);
+	    if(relTables.get(0).isHidden()){   		//checks if there are hidden in the reltable
+		hiddenCombe = true;
+		hidNames.add(relTables.get(0).getNodeName());
+	    }
+	    if(relTables.size() > 1){
+		for(int i=1; i<relTables.size(); i++){
+		    NodeTable t1 = relTables.get(i);
+		    if(t1.isHidden()){   		//checks if there are hidden in the reltable
+			hiddenCombe = true;
+			hidNames.add(relTables.get(i).getNodeName());
+		    }
+		    combTable = joinTables(combTable,t1,result);		
+		    String name =relTables.get(i).getNodeName();
+		    if(name!=null && name.equals(q.getSubject().getNode().getName())){
+			continue;
+		    }
+		    for(String redundant : notRelavent(combTable,nt,outTables,q)){
+			eliminate(combTable,redundant);		//eliminate all the nodes that are not relevant anymore;
+		    }
+		}
+	    }
+	}
+	combTable = joinTables(combTable, nt, result);	
+	combTable.setHidden(hiddenCombe);			
+	combTable.setHiddens(hidNames); 			
+	if(hidNames.size()==1){
+	    combTable.setNodeName(hidNames.get(0));		
+	}
 	tables.clear();
 	tables.addAll(outTables);
+	return combTable;
+    }
+
+
+    private List<String> notRelavent(NodeTable combTable, NodeTable nt, List<NodeTable> outTables, Query q) {
+	List<String> redundantVars = new ArrayList<String>();
+	List<String> relevantVars =new ArrayList<String>();
+	relevantVars.add(q.getSubject().getNode().getName());
+	for(NodeTable nodeTable : outTables){
+	    for(String s :nodeTable.getEvidence()){
+		if(!relevantVars.contains(s)){
+		    relevantVars.add(s);
+		}
+	    }
+	    if(nodeTable.getNodeName()!=null){
+		if(!relevantVars.contains(nodeTable.getNodeName())){
+		    relevantVars.add(nodeTable.getNodeName());
+		}
+	    }
+	}
+	if(nt.getNodeName()!=null){
+	    if(!relevantVars.contains(nt.getNodeName())){
+		relevantVars.add(nt.getNodeName());
+	    }
+	}
+	for(String s : combTable.getEvidence()){
+	    if(!relevantVars.contains(s)){
+		redundantVars.add(s);
+	    }
+	}
+	return redundantVars;
+    }
+
+    private void eliminate(NodeTable combTable, String hiddenName) {
+	for(Row row : combTable.getRows()){
+	    for(Vnode vn: row.getVnodes()){
+		if(vn.getNode().getName().equals(hiddenName)){
+		    row.removeVnode(vn);
+		    break;
+		}
+	    }
+	}
+	List<Row> rows = new ArrayList<Row>();	
+	boolean same;
+	for(Row row1 : combTable.getRows()){
+	    same =false;
+	    if(rows.contains(row1)){
+		continue;
+	    }
+	    for(Row row2 : rows){
+		if(Util.listEqualsIgnoreOrder(row1.getVnodes(), row2.getVnodes())){
+		    row2.setPropbility(row1.getPropbility()+row2.getPropbility());
+		    same =true;
+		}
+	    }
+	    if(!same){
+		rows.add(row1);
+	    }
+	    combTable.setRows(rows);
+	    combTable.removeEvidence(hiddenName);
+	}
+    }
+
+
+    private NodeTable joinTables(NodeTable table1, NodeTable table2, Result result) {
+	List<String> resambleColumns =new ArrayList<String>();
+	for(Vnode vn1:table1.getRows().get(0).getVnodes()){ 
+	    for(Vnode vn2:table2.getRows().get(0).getVnodes()){
+		if(vn1.getNode().getName().equals(vn2.getNode().getName())){
+		    resambleColumns.add(vn1.getNode().getName());
+		    break;
+		}
+	    }
+	}
+	NodeTable nodeTable = new NodeTable();
+	for(Row combRow : table1.getRows()){
+	    List<Row> rList = getRow(combRow,table2,resambleColumns);
+	    if(rList.size() > 0){
+		for(Row row : rList){
+		    joinRow(nodeTable,combRow,row,resambleColumns,result);
+		}
+	    }
+	}
+	return nodeTable;
+    }
+
+    private void joinRow(NodeTable nodeTable, Row combRow, Row row, List<String> resambleColumns, Result result) {
+	Row resRow = new Row();
+	for(Vnode vn:combRow.getVnodes()){
+	    resRow.addVnode(vn);
+	    if(!nodeTable.getEvidence().contains(vn.getNode().getName())){
+		nodeTable.addNodeEvidence(vn.getNode().getName());
+	    }
+	}
+	for(Vnode vn:row.getVnodes()){
+	    if(!resambleColumns.contains(vn.getNode().getName())){
+		resRow.addVnode(vn);
+		if(!nodeTable.getEvidence().contains(vn.getNode().getName())){
+		    nodeTable.addNodeEvidence(vn.getNode().getName());
+		}
+	    }
+	}
+	resRow.setPropbility(combRow.getPropbility()*row.getPropbility());
+	result.setMultiplication(result.getMultiplication()+1);
+	nodeTable.addRow(resRow);
+    }
+
+    private List<Row> getRow(Row combRow, NodeTable table, List<String> resambleColumns) {
+	List<Row> rows=new ArrayList<Row>();
+	for(Row row : table.getRows()){
+	    if(isMatch(row,combRow,resambleColumns)){
+		rows.add(row);
+	    }
+	}
+	return rows;
+    }
+
+    private boolean isMatch(Row row, Row combRow, List<String> resambleColumns) {
+	boolean isMatch = true;
+	isMatch = false;
+
+	for(Vnode vn1:row.getVnodes()){
+	    for(Vnode vn2 : combRow.getVnodes()){
+		if(resambleColumns.contains(vn1.getNode().getName())){
+		    if(vn1.equals(vn2)){
+			isMatch =true;
+			break;
+		    }
+		    if(vn1.getNode().getName().equals(vn2.getNode().getName())){
+			return false;
+		    }
+		}
+	    }
+	}
+	return isMatch;
     }
 
     private boolean isRelavantTable(NodeTable table, NodeTable nt) {
-	// TODO Auto-generated method stub
-	return false;
+	boolean res =false;
+	if(table.equals(nt)){
+	    return res;
+	}
+	if(table.getEvidence().contains(nt.getNodeName())){
+	    res = true;
+	}else{
+	    for(String name : nt.getHiddens()){									
+		if(table.getEvidence().contains(name)){
+		    res = true;
+		}
+	    }
+	}
+	return res;
     }
 
-    private void buildTable(NodeTable table, Node node) {
-	table.addNodeName(node.getName());
-	if(!node.getParents().isEmpty()){
-	    for(Node parent: node.getParents()){
-		table.addNodeName(parent.getName());
+    private void buildTable(NodeTable table, Node node, Query q) {
+	boolean isbuildAll =false;
+	String name =null; 
+	if(node.getName().equals(q.getSubject().getNode().getName()) || node.isHidden()){
+	    isbuildAll = true;
+	}else{
+	    for(Vnode vn :q.getEvidence()){
+		if(vn.getNode().getName().equals(node.getName())){
+		    name=vn.getValue();
+		}
 	    }
+	}
+	table.addNodeName(node.getName());
+	for(Node parent: node.getParents()){
+	    table.addNodeEvidence(parent.getName());
 	}
 	for(CPT cpt: node.getCPT()){
 	    for(ValueP vp: cpt.getValueP()){
-		Row row = new Row();
-		if(!cpt.getDependenc().isEmpty()){
+		boolean isAdd = isbuildAll;
+		if(!isAdd){
+		    if(vp.getValue().equals(name)){
+			Row row = new Row();
+			for(Vnode vn :cpt.getDependenc()){
+			    row.addVnode(vn);
+			}
+			row.addVnode(new Vnode(node, name));
+			row.setPropbility(vp.getProp());
+			table.addRow(row);
+		    }
+		}
+		if(isAdd){
+		    Row row = new Row();
 		    for(Vnode vn :cpt.getDependenc()){
 			row.addVnode(vn);
 		    }
+		    row.addVnode(new Vnode(node, vp.getValue()));
+		    row.setPropbility(vp.getProp());
+		    table.addRow(row);
 		}
-		row.addVnode(new Vnode(node, vp.getValue()));
-		row.setPropbility(vp.getProp());
-		table.addRow(row);
 	    }
 	}
     }
+
 
     /**
      * this is the third algorithm
@@ -150,8 +385,6 @@ public class Algorithms{
 
     /**
      * this method checks what are the nodes that are not in the query and calculate the probabilistic
-     * @param vnode
-     * @param list
      * @author Yair Ivgi
      * @return double 
      * @throws Exception 
@@ -205,6 +438,13 @@ public class Algorithms{
 	@Override
 	public int compare(Node o1, Node o2) {
 	    return o1.getName().compareTo(o2.getName());
+	}
+    }
+
+    class factorSize implements Comparator<NodeTable>{
+	@Override
+	public int compare(NodeTable o1, NodeTable o2) {	   
+	    return o1.getRows().size() - o2.getRows().size();
 	}
     }
 }
