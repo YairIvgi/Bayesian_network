@@ -4,46 +4,40 @@
  * @author Yair Ivgi
  */
 public class Vnode {
+    private Node node;
+    private String value;
 
-	private Node node;
-	private String value;
-	
-	Vnode(Node node,String value) {
-		this.node = node;
-		this.value =value;
-	}
+    Vnode(Node node,String value) {
+	this.node = node;
+	this.value =value;
+    }
 
-	public Vnode(Vnode vn) {
-	    this.node = vn.node;
-		this.value =vn.value;
-	}
+    public Vnode(Vnode vn) {
+	this.node = vn.node;
+	this.value =vn.value;
+    }
 
-	public Node getNode() {
-		return node;
-	}
+    public Node getNode() {
+	return node;
+    }
 
-	public String getValue() {
-		return value;
-	}
-	
-	public void setValue(String value){
-		this.value = value;
-	}
-	@Override
-	public String toString() {
-		return "Vnode [node=" + node.getName() + ", value=" + value + "]";
-	}
+    public String getValue() {
+	return value;
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof Vnode)){
-			return false;
-		}
-		Vnode v =(Vnode) o;
-		if(v.getValue().equals(getValue()) && v.getNode().getName().equals(getNode().getName())){
-			return true;
-		}
-		return false;
+    public void setValue(String value){
+	this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+	if (!(o instanceof Vnode)){
+	    return false;
 	}
-	
+	Vnode v =(Vnode) o;
+	if(v.getValue().equals(getValue()) && v.getNode().getName().equals(getNode().getName())){
+	    return true;
+	}
+	return false;
+    }
 }

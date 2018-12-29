@@ -6,35 +6,34 @@ import java.text.NumberFormat;
  *
  */
 public class Result {
+    private int multiplication;
+    private int addition;
+    private double propability;
 
-	private int multiplication;
-	private int addition;
-	private double propability;
-	
-	public void setMultiplication(int multiplication) {
-		this.multiplication = multiplication;
-	}
-	
-	public void setAddition(int addition) {
-		this.addition = addition;
-	}
-	
-	public void setPropability(double propability) {
-		this.propability = propability;
-	}
+    public void setMultiplication(int multiplication) {
+	this.multiplication = multiplication;
+    }
 
-	public int getMultiplication() {
-		return multiplication;
-	}
+    public void setAddition(int addition) {
+	this.addition = addition;
+    }
 
-	public int getAddition() {
-		return addition;
-	}
+    public void setPropability(double propability) {
+	this.propability = propability;
+    }
 
-	@Override
-	public String toString() {
-		NumberFormat formatter = new DecimalFormat("#0.00000");
-		propability = propability *1.00000;
-		return  formatter.format(propability)+","+addition+","+multiplication;
-	}
+    public int getMultiplication() {
+	return multiplication;
+    }
+
+    public int getAddition() {
+	return addition;
+    }
+
+    @Override
+    public String toString() {
+	NumberFormat formatter = new DecimalFormat("#0.00000");
+	propability = propability *1.00000;
+	return  formatter.format(propability)+","+addition+","+multiplication;
+    }
 }

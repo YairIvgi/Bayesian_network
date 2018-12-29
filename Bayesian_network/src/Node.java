@@ -71,33 +71,8 @@ public class Node{
 	cpt.add(c);
     }
 
-    //    public void print(){
-    //	System.out.println(name);
-    //	System.out.print("Values: ");
-    //	for(String s : values){
-    //	    System.out.print(s+",");
-    //	}
-    //	System.out.println();
-    //	System.out.print("Parents: ");
-    //	for(Node s : parents){
-    //	    System.out.print(s.getName()+",");
-    //	}
-    //	System.out.println();
-    //	System.out.println("CPT: ");
-    //	for(CPT c : cpt){
-    //	    c.printCpt();
-    //	    System.out.println("\n");
-    //	}
-    //    }
-
-    public void print2(){
-	System.out.println(name);
-    }
-
-
     /**
      * This method checks if two Nodes are equal
-     * @author Yair Ivgi
      * @return boolean
      */
     @Override
@@ -114,7 +89,6 @@ public class Node{
 
     /**
      * This method removes the non relevant nodes to the specific query from the bayesian network   
-     * @author Yair Ivgi
      * @return List<Node>
      */
     static List<Node> removeNotRelaventNodes(List<Vnode> query) {
@@ -133,7 +107,6 @@ public class Node{
 
     /**
      * This method recurse on the ancestors of a specific node and returns them   
-     * @author Yair Ivgi
      * @return List<Node>
      */
     private List<Node> recursive(List<Node> nodes){
@@ -148,7 +121,6 @@ public class Node{
 
     /**
      * This method returns a distinct list from a list of nodes    
-     * @author Yair Ivgi
      * @return List<Node>
      */
     private static List<Node> getDistinctList(List<Node> list){

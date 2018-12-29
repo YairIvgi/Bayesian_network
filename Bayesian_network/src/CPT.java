@@ -3,36 +3,52 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
+/**
+ * This class represent the CPT values of a node in a bayesian network 
+ * @author Yair Ivgi
+ *
+ */
 public class CPT {
     private List<Vnode> dependenc;
     private List<ValueP> valueP;
     private List<Node> parents;
     private List<String> values;
 
-
+    /**
+     * constructor
+     * @param values
+     * @param parents
+     */
     public CPT(List<String> values,List<Node> parents){
 	this.parents = parents;
 	this.values = values;
 	valueP = new ArrayList<ValueP>();
 	dependenc = new ArrayList<Vnode>();
     }
-    
-    public CPT(CPT cpt){
-   	this.parents = cpt.parents;
-   	this.values = cpt.values;
-   	valueP = new ArrayList<ValueP>();
-   	for(ValueP vp : cpt.getValueP()){
-   	    valueP.add(new ValueP(vp));
-   	}
-   	dependenc = new ArrayList<Vnode>();
-   	for(Vnode vn : cpt.getDependenc()){
-   	    dependenc.add(new Vnode(vn));
-   	}
-       }
 
+    /**
+     * CPT copy constructor 
+     * @param cpt
+     */
+    public CPT(CPT cpt){
+	this.parents = cpt.parents;
+	this.values = cpt.values;
+	valueP = new ArrayList<ValueP>();
+	for(ValueP vp : cpt.getValueP()){
+	    valueP.add(new ValueP(vp));
+	}
+	dependenc = new ArrayList<Vnode>();
+	for(Vnode vn : cpt.getDependenc()){
+	    dependenc.add(new Vnode(vn));
+	}
+    }
+
+    /**
+     * This method adds CPT line to the Node CPT list
+     * @author Yair Ivgi
+     */
     public void addCPT(String line){
-	List<String> tempCPT = Arrays.asList(line.split(","));
+	List<String> tempCPT = Arrays.asList(line.split(","));	//split the parents with ','
 	Iterator<String> itrString = tempCPT.iterator();
 	Iterator<Node> itrNode =parents.iterator();
 	String word = null;
@@ -46,7 +62,7 @@ public class CPT {
 	    }
 	    dependenc.add(new Vnode(itrNode.next(), word));
 	}
-	while(itrString.hasNext()){
+	while(itrString.hasNext()){		//Phrase to value and probability using '='
 	    if(word.startsWith("=")){
 		String val =word.replace("=", "");
 		word = itrString.next();
@@ -69,7 +85,7 @@ public class CPT {
 		}
 	    }
 	    if(!found){
-		DecimalFormat df = new DecimalFormat("##.00000");
+		DecimalFormat df = new DecimalFormat("##.00000");	//change the probability to the required format
 		valueP.add(new ValueP(val, Double.valueOf(df.format(1-adverse))));
 	    }
 	}
@@ -83,19 +99,9 @@ public class CPT {
 	return valueP;
     }
 
-    public void printCpt(){
-	for(Vnode s: dependenc){
-	    System.out.print(s.getNode().getName()+" "+s.getValue()+" ");
-	}
-	System.out.println();
-	for(ValueP vp: valueP){
-	    System.out.println(vp.getValue()+" "+vp.getProp()+" ");
-	}
-    }
-
     /**
-     * @author Yair Ivgi 
      * This function returns the probability of the value regarding the CPT table.
+     * @author Yair Ivgi 
      */
 
     static double getCptProp(CPT cpt,String value){	
@@ -108,5 +114,4 @@ public class CPT {
 	}
 	return result;
     }
-
 }

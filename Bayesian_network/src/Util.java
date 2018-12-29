@@ -6,12 +6,9 @@ import java.util.List;
  * @author Yair Ivgi
  * @throws exeptions
  */
-
 public class Util {
-
     /** 
      * This function returns the probability of a node and it`s value by the evidence.
-     * @author Yair Ivgi
      * @throws exeptions
      */
     public static double getPropability(Vnode subject, List<Vnode> evidence) throws Exception{
@@ -41,7 +38,6 @@ public class Util {
 
     /** 
      * This function returns a list of Vnode all the permutation of the nodes and values.
-     * @author Yair Ivgi
      */
     static List<List<Vnode>> cartesianProduct(List<Node> list){
 	List<List<Vnode>> product =  new ArrayList<List<Vnode>>();
@@ -62,7 +58,6 @@ public class Util {
 
     /** 
      * recursive sub function for the Cartesian product
-     * @author Yair Ivgi
      */
     public static  List<List<Vnode>> calculate(List<List<Vnode>> input) {
 	List<List<Vnode>> res = new ArrayList<>();
@@ -77,24 +72,22 @@ public class Util {
 
     /** 
      * This function returns a list of Vnode all the permutation of the nodes and values.
-     * @author Yair Ivgi
      */
     private static  void process(List<List<Vnode>> lists, List<List<Vnode>> res) {
-	List<Vnode> head = lists.get(0); //take first element of the list
+	List<Vnode> head = lists.get(0); 					//take first element of the list
 	List<List<Vnode>> tail = calculate(lists.subList(1, lists.size())); //invoke calculate on remaining element, here is recursion
 
-	for (Vnode h : head) { // for each head
-	    for (List<Vnode> t : tail) { //iterate over the tail
+	for (Vnode h : head) { 				// for each head
+	    for (List<Vnode> t : tail) { 		//iterate over the tail
 		List<Vnode> tmp = new ArrayList<>(t.size());
-		tmp.add(h); // add the head
-		tmp.addAll(t); // and current tail element
+		tmp.add(h); 				// add the head
+		tmp.addAll(t); 				// and current tail element
 		res.add(tmp);
 	    }
 	}
     }
 
     /** 
-     * @author Yair Ivgi
      * This function checks if the Vnode is in the list.
      */
     static boolean isExistVnode(Node node,List<Vnode> list){
@@ -107,7 +100,6 @@ public class Util {
     }
 
     /** 
-     * @author Yair Ivgi
      * This function checks if the node is in the list.
      */
     static boolean isExistNode(Node node,List<Node> list){
@@ -166,7 +158,6 @@ public class Util {
 
     /** 
      * set all the hidden Nodes of the query
-     * @author Yair Ivgi
      */
     public static void setHiddenNodes(List<Node> nodes,List<Vnode> dependence){
 	for(Node node: nodes){
@@ -178,7 +169,6 @@ public class Util {
 
     /** 
      * return all the hidden Nodes of the query
-     * @author Yair Ivgi
      */
     public static List<Node> hiddenNodes(List<Node> nodes,List<Vnode> dependence){
 	List<Node> notInQuery =new ArrayList<Node>();
@@ -191,10 +181,8 @@ public class Util {
     }
 
     /** 
-     * @author Yair Ivgi
      * This function checks if the node is in the list.
      */
-
     static boolean isExist(Node node,List<Vnode> list){
 	for(Vnode v : list){
 	    if(v.getNode().equals(node)){

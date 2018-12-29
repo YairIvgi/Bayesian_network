@@ -16,8 +16,7 @@ public class Algorithms{
     }
 
     /**
-     * this is the first algorithm
-     * @author Yair Ivgi
+     * This is the first algorithm
      * @return double
      * @throws Exception
      */
@@ -42,8 +41,7 @@ public class Algorithms{
     }
 
     /**
-     * this is the second algorithm
-     * @author Yair Ivgi
+     * This is the second algorithm
      * @return double
      */
     public Result calculate2(Query q) {
@@ -61,14 +59,14 @@ public class Algorithms{
 	for(Node node : qNodes){
 	    NodeTable table =new NodeTable();
 	    tables.add(table);
-	    buildTable(table,node,q);
+	    buildTable(table,node,q);		//turns all the nodes to tables, its more comfortable to calculate 
 	    table.setHidden(node.isHidden());
 	}
 	boolean isFinished = false;
 	while(!isFinished){
 	    isFinished = true;
-	    for(NodeTable nt : tables){
-		if(nt.isHidden()){		    /// && !nt.isHandled()
+	    for(NodeTable nt : tables){		//go on the list of tables and sum all the hidden tables appearances 
+		if(nt.isHidden()){		   
 		    NodeTable combTable = JoinTableList(tables, nt,result,q);
 		    eliminate(combTable,nt.getNodeName());				
 		    tables.add(combTable);
@@ -79,12 +77,12 @@ public class Algorithms{
 	    }
 	}
 	NodeTable res =new NodeTable();
-	if(tables.size()==1){
+	if(tables.size()==1){		//if we finished to eliminate all the tables beside the one of the query  
 	    res = tables.get(0);
-	}else{
+	}else{				// if there are still several  tables but there are no more hidden tables
 	    NodeTable combTable =new NodeTable();
 	    while(true){
-		for(NodeTable nt : tables){
+		for(NodeTable nt : tables){	
 		    Collections.sort(tables,new factorSize());
 		    combTable = JoinTableList(tables, nt,result,q);
 		    if(combTable==null){
@@ -97,7 +95,7 @@ public class Algorithms{
 
 		    break;
 		}
-		if(tables.size()==1){
+		if(tables.size()==1){		//if we finished to eliminate all the tables beside the one of the query  
 		    res = tables.get(0);
 		    break;
 		}
@@ -115,8 +113,7 @@ public class Algorithms{
 
     /**
      * This method joins all the appearances of the hidden node in the network by the V.E algorithm
-     * @author Yair Ivgi
-     * @param q 
+     * @param query
      * @return void
      */
     private NodeTable JoinTableList(List<NodeTable> tables, NodeTable nt, Result result, Query q) {		
@@ -124,7 +121,7 @@ public class Algorithms{
 	List<NodeTable> relTables = new ArrayList<NodeTable>();
 	for(NodeTable table : tables){
 	    if(!table.isHandled()){
-		if(!isRelavantTable(table,nt)){
+		if(!isRelevantTable(table,nt)){
 		    if(!table.equals(nt)){
 			outTables.add(table);
 		    }
@@ -135,8 +132,8 @@ public class Algorithms{
 	}
 	if(relTables.size()==0){
 	    tables.clear();
-		tables.addAll(outTables);
-		return null;
+	    tables.addAll(outTables);
+	    return null;
 	}
 	Collections.sort(relTables,new factorSize());  	//sort all the tables by the factor size
 	NodeTable combTable = new NodeTable();
@@ -160,7 +157,7 @@ public class Algorithms{
 		    if(name!=null && name.equals(q.getSubject().getNode().getName())){
 			continue;
 		    }
-		    for(String redundant : notRelavent(combTable,nt,outTables,q)){
+		    for(String redundant : notRelevant(combTable,nt,outTables,q)){
 			eliminate(combTable,redundant);		//eliminate all the nodes that are not relevant anymore;
 		    }
 		}
@@ -177,8 +174,15 @@ public class Algorithms{
 	return combTable;
     }
 
-
-    private List<String> notRelavent(NodeTable combTable, NodeTable nt, List<NodeTable> outTables, Query q) {
+    /**
+     * Returns a list of all the non relevant tables 
+     * @param combTable
+     * @param nt
+     * @param outTables
+     * @param q
+     * @return
+     */
+    private List<String> notRelevant(NodeTable combTable, NodeTable nt, List<NodeTable> outTables, Query q) {
 	List<String> redundantVars = new ArrayList<String>();
 	List<String> relevantVars =new ArrayList<String>();
 	relevantVars.add(q.getSubject().getNode().getName());
@@ -207,6 +211,11 @@ public class Algorithms{
 	return redundantVars;
     }
 
+    /**
+     * Canceling node impressions in the table
+     * @param combTable
+     * @param hiddenName
+     */
     private void eliminate(NodeTable combTable, String hiddenName) {
 	for(Row row : combTable.getRows()){
 	    for(Vnode vn: row.getVnodes()){
@@ -237,7 +246,13 @@ public class Algorithms{
 	}
     }
 
-
+    /**
+     * Joins tow tables to generate a new table
+     * @param table1
+     * @param table2
+     * @param result
+     * @return NodeTable
+     */
     private NodeTable joinTables(NodeTable table1, NodeTable table2, Result result) {
 	List<String> resambleColumns =new ArrayList<String>();
 	for(Vnode vn1:table1.getRows().get(0).getVnodes()){ 
@@ -260,6 +275,14 @@ public class Algorithms{
 	return nodeTable;
     }
 
+    /**
+     * Joins the corresponding rows in the table to combRow
+     * @param nodeTable
+     * @param combRow
+     * @param row
+     * @param resambleColumns
+     * @param result
+     */
     private void joinRow(NodeTable nodeTable, Row combRow, Row row, List<String> resambleColumns, Result result) {
 	Row resRow = new Row();
 	for(Vnode vn:combRow.getVnodes()){
@@ -281,6 +304,13 @@ public class Algorithms{
 	nodeTable.addRow(resRow);
     }
 
+    /**
+     * Returns the corresponding rows from the table to the combRow
+     * @param combRow
+     * @param table
+     * @param resambleColumns
+     * @return	List<Row>
+     */
     private List<Row> getRow(Row combRow, NodeTable table, List<String> resambleColumns) {
 	List<Row> rows=new ArrayList<Row>();
 	for(Row row : table.getRows()){
@@ -291,10 +321,15 @@ public class Algorithms{
 	return rows;
     }
 
+    /**
+     * Checks if the two rows are a match to create a new combined row
+     * @param row
+     * @param combRow
+     * @param resambleColumns
+     */
     private boolean isMatch(Row row, Row combRow, List<String> resambleColumns) {
 	boolean isMatch = true;
 	isMatch = false;
-
 	for(Vnode vn1:row.getVnodes()){
 	    for(Vnode vn2 : combRow.getVnodes()){
 		if(resambleColumns.contains(vn1.getNode().getName())){
@@ -311,7 +346,13 @@ public class Algorithms{
 	return isMatch;
     }
 
-    private boolean isRelavantTable(NodeTable table, NodeTable nt) {
+    /**
+     * Checks if the table of the nt is relevant to the calculation of the hidden nt table
+     * @param table
+     * @param nt
+     * @return boolean
+     */
+    private boolean isRelevantTable(NodeTable table, NodeTable nt) {
 	boolean res =false;
 	if(table.equals(nt)){
 	    return res;
@@ -327,7 +368,12 @@ public class Algorithms{
 	}
 	return res;
     }
-
+    /**
+     * This method turns the node into table for more comfortable calculation 
+     * @param table
+     * @param node
+     * @param query
+     */
     private void buildTable(NodeTable table, Node node, Query q) {
 	boolean isbuildAll =false;
 	String name =null; 
@@ -371,10 +417,8 @@ public class Algorithms{
 	}
     }
 
-
     /**
-     * this is the third algorithm
-     * @author Yair Ivgi
+     * This is the third algorithm
      * @return double
      * @throws Exception
      */
@@ -384,8 +428,7 @@ public class Algorithms{
     }
 
     /**
-     * this method checks what are the nodes that are not in the query and calculate the probabilistic
-     * @author Yair Ivgi
+     * This method checks what are the nodes that are not in the query and calculate the probabilistic
      * @return double 
      * @throws Exception 
      */
@@ -431,9 +474,7 @@ public class Algorithms{
 
     /**
      *class that implements comparator and compare alphabetically list of nodes
-     *@author Yair Ivgi
      */
-
     class alphabeticalComparator implements Comparator<Node>{
 	@Override
 	public int compare(Node o1, Node o2) {
@@ -441,6 +482,9 @@ public class Algorithms{
 	}
     }
 
+    /**
+     * class that implements comparator and compare using the factor size of the table 
+     */
     class factorSize implements Comparator<NodeTable>{
 	@Override
 	public int compare(NodeTable o1, NodeTable o2) {	   

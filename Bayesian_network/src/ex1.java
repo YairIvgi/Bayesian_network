@@ -4,7 +4,7 @@ public class ex1 {
 
 	Network test = new Network();
 	try {
-	    test.readFile("test_files/input4.txt");
+	    test.readFile("test_files/input1.txt");
 	    test.executeQueries();
 
 	    test.writeFile();

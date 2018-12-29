@@ -3,7 +3,6 @@
  * @author Yair Ivgi
  */
 public class ValueP {
-
     private String value;
     private double propbility;
 
@@ -24,7 +23,5 @@ public class ValueP {
     public double getProp() {
 	return propbility;
     }
-
-
 }
 

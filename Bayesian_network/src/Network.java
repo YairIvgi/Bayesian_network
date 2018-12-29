@@ -99,7 +99,7 @@ public class Network {
 	    }
 	    br.close();
 	} catch (FileNotFoundException e) {
-	    // TODO Auto-generated catch block
+	    System.err.println("File Not Found");
 	}
 
     }
@@ -127,9 +127,6 @@ public class Network {
 		continue;
 	    }
 	}
-//	for(Result res : results){
-//	    System.out.println(res);
-//	}
     }
 
     /**
@@ -146,16 +143,4 @@ public class Network {
 	}
 	writer.close();
     }
-
-    //    public  void print(){
-    //	for (int i = 0; i < nodes.size(); i++) {
-    //	    nodes.get(i).print();
-    //	    System.out.println();
-    //	}
-    //	System.out.println("Queries: ");
-    //	for (int i = 0; i < queries.size(); i++) {
-    //	    queries.get(i).print();
-    //	    System.out.println();
-    //	}
-    //    }
 }

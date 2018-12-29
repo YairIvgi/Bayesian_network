@@ -1,8 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * This class represent a line in the table of NodeTable class 
+ * @author Yair Ivgi
+ */
 public class Row {
-
     private List<Vnode> vnodes;
     private double propbility;
 
@@ -18,18 +20,11 @@ public class Row {
     public double getPropbility() {return propbility;}
 
     public void setPropbility(double propbility) {this.propbility = propbility;}
-    
+
     public void setVnodes(List<Vnode> vnodes){ this.vnodes = vnodes;}
 
     public void removeVnode(Vnode v){
 	vnodes.remove(v);
-    }
-    
-    public void print() {
-	for(Vnode vn:vnodes){
-	    System.out.print(vn.getNode().getName()+":"+vn.getValue()+"  ");
-	}
-	System.out.println(propbility);
     }
 }
 
