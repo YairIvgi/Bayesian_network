@@ -4,13 +4,12 @@ public class ex1 {
 
 	Network test = new Network();
 	try {
-	    test.readFile("test_files/input1.txt");
+	    test.readFile("input1.txt");
 	    test.executeQueries();
 
 	    test.writeFile();
 	} catch (Exception e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
+	  System.err.println("Error: "+e.getMessage());
 	}
     }
 }

@@ -1,7 +1,11 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *This class executes the three algorithms of the bayesian network.
@@ -41,13 +45,13 @@ public class Algorithms{
     }
 
     /**
-     * This is the second algorithm
-     * @return double
+     * This method arranges the data for the second algorithm
+     * @param q
+     * @param qNodes
+     * @param qRelevant
+     * @param tables
      */
-    public Result calculate2(Query q) {
-	Result result =new Result();
-	List<Node> qNodes =new ArrayList<Node>();	//all the nodes
-	List<Vnode> qRelevant =new ArrayList<Vnode>();		//all the query nodes
+    private void setAlgo2Data(Query q, List<Node> qNodes, List<Vnode> qRelevant, List<NodeTable> tables){
 	qRelevant.addAll(q.getEvidence());
 	qRelevant.add(q.getSubject());	//add the subject to the list of nodes that appear in the query				
 	for(Node node : Node.removeNotRelaventNodes(qRelevant)){	//remove all the nodes that are not relevant to the query
@@ -55,61 +59,99 @@ public class Algorithms{
 	}
 	Util.setHiddenNodes(qNodes,qRelevant);	 //set all the hidden nodes of the query
 	Collections.sort(qNodes,new alphabeticalComparator());  	//sort all the hidden Nodes
-	List<NodeTable> tables = new ArrayList<NodeTable>();
 	for(Node node : qNodes){
 	    NodeTable table =new NodeTable();
 	    tables.add(table);
 	    buildTable(table,node,q);		//turns all the nodes to tables, its more comfortable to calculate 
 	    table.setHidden(node.isHidden());
 	}
-	boolean isFinished = false;
-	while(!isFinished){
-	    isFinished = true;
-	    for(NodeTable nt : tables){		//go on the list of tables and sum all the hidden tables appearances 
-		if(nt.isHidden()){		   
-		    NodeTable combTable = JoinTableList(tables, nt,result,q);
-		    eliminate(combTable,nt.getNodeName());				
-		    tables.add(combTable);
-		    nt.setHandled(true);
-		    isFinished = false;
-		    break;
-		}
-	    }
+    }
+/**
+ * This method arranges the data for the third algorithm
+ * @param q
+ * @param qNodes
+ * @param qRelevant
+ * @param tables
+ */
+    private void setAlgo3Data(Query q, List<Node> qNodes, List<Vnode> qRelevant, List<NodeTable> tables) {
+	qRelevant.addAll(q.getEvidence());
+	qRelevant.add(q.getSubject());	//add the subject to the list of nodes that appear in the query				
+	for(Node node : Node.removeNotRelaventNodes(qRelevant)){	//remove all the nodes that are not relevant to the query
+	    qNodes.add(new Node(node));
 	}
-	NodeTable res =new NodeTable();
-	if(tables.size()==1){		//if we finished to eliminate all the tables beside the one of the query  
-	    res = tables.get(0);
-	}else{				// if there are still several  tables but there are no more hidden tables
-	    NodeTable combTable =new NodeTable();
-	    while(true){
-		for(NodeTable nt : tables){	
-		    Collections.sort(tables,new factorSize());
-		    combTable = JoinTableList(tables, nt,result,q);
-		    if(combTable==null){
-			break;						
-		    }
-		    if(combTable.getEvidence().size()>2){		
-			eliminate(combTable,nt.getNodeName());
-		    }
-		    tables.add(combTable);
 
-		    break;
-		}
-		if(tables.size()==1){		//if we finished to eliminate all the tables beside the one of the query  
-		    res = tables.get(0);
-		    break;
-		}
-	    }
+	qNodes = minSizeHeuristic(qNodes);  	//sort all the hidden Nodes
+	Util.setHiddenNodes(qNodes,qRelevant);	 //set all the hidden nodes of the query
+	for(Node node : qNodes){
+	    NodeTable table =new NodeTable();
+	    tables.add(table);
+	    buildTable(table,node,q);		//turns all the nodes to tables, its more comfortable to calculate 
+	    table.setHidden(node.isHidden());
 	}
-	res.normalize(result);
-	for(Row row : res.getRows()){
-	    if(row.getVnodes().contains(q.getSubject())){
-		result.setPropability(row.getPropbility());
-	    }
-	}
-	return result;
     }
 
+    /**
+     * This is the heuristics of the elimination of the third algorithm , it eliminate the nodes that have the highest number of connections first.
+     * @param qNodes
+     * @return
+     */
+    private List<Node> minSizeHeuristic(List<Node> qNodes){
+	HashMap<String,Integer> namesMap = new HashMap<String,Integer>();
+	HashMap<String,Node> nodesMap = new HashMap<String,Node>();
+	List<Node> resNodes = new ArrayList<Node>();
+
+	for(Node node : qNodes){
+	    nodesMap.put(node.getName(), node);	
+	    for(Node parent : node.getParents()){
+		Integer countP = namesMap.get(parent.getName());
+		if(namesMap.get(parent.getName())==null){
+		    namesMap.put(parent.getName(), 1);
+		}
+		if (countP == null) {
+		    namesMap.put(parent.getName(), 1);
+		}
+		else {
+		    namesMap.put(parent.getName(), countP + 1);
+		}
+	    }   
+	}
+
+	for(Node node :qNodes){
+	    Integer countN = namesMap.get(node.getName());
+	    if(countN ==null){
+		countN =0;
+		namesMap.put(node.getName(), countN);
+	    }
+	    if(!node.getParents().isEmpty()){
+		namesMap.put(node.getName(), countN + node.getParents().size());
+	    }	     
+	}
+	Map<String, Integer> sorted =namesMap		
+		.entrySet()		
+		.stream()		
+		.sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))		
+		.collect(
+			Collectors.toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2,		
+				LinkedHashMap::new));
+	for(String name : sorted.keySet()){
+	    resNodes.add(nodesMap.get(name));
+	}
+	return resNodes;
+    }
+
+    /**
+     * This is the second algorithm
+     * @return double
+     */
+    public Result calculate2(Query q) {
+	Result result =new Result();
+	List<Node> qNodes =new ArrayList<Node>();	//all the nodes
+	List<Vnode> qRelevant =new ArrayList<Vnode>();		//all the query nodes
+	List<NodeTable> tables = new ArrayList<NodeTable>();
+	setAlgo2Data(q,qNodes,qRelevant,tables);
+	variableElimination(result,tables,q);
+	return result;
+    }
 
     /**
      * This method joins all the appearances of the hidden node in the network by the V.E algorithm
@@ -347,7 +389,7 @@ public class Algorithms{
     }
 
     /**
-     * Checks if the table of the nt is relevant to the calculation of the hidden nt table
+     * Checks if the table of the nt is relevant to the calculation of the hidden table
      * @param table
      * @param nt
      * @return boolean
@@ -368,6 +410,7 @@ public class Algorithms{
 	}
 	return res;
     }
+
     /**
      * This method turns the node into table for more comfortable calculation 
      * @param table
@@ -424,7 +467,68 @@ public class Algorithms{
      */
     public Result calculate3(Query q) {
 	Result result =new Result();
+	List<Node> qNodes =new ArrayList<Node>();	//all the nodes
+	List<Vnode> qRelevant =new ArrayList<Vnode>();		//all the query nodes
+	List<NodeTable> tables = new ArrayList<NodeTable>();
+	setAlgo3Data(q,qNodes,qRelevant,tables);
+	variableElimination(result,tables,q);
 	return result;
+    }
+/**
+ * This method is the actual V.E algorithm the same as algorithm 2
+ * @param result
+ * @param tables
+ * @param q
+ */
+    private void variableElimination(Result result, List<NodeTable> tables, Query q){
+	boolean isFinished = false;
+	while(!isFinished){
+	    isFinished = true;
+	    for(NodeTable nt : tables){		//go on the list of tables and sum all the hidden tables appearances 
+		if(nt.isHidden()){		   
+		    NodeTable combTable = JoinTableList(tables, nt,result,q);
+		    if(combTable ==null){
+			break;
+		    }
+		    eliminate(combTable,nt.getNodeName());				
+		    tables.add(combTable);
+		    nt.setHandled(true);
+		    isFinished = false;
+		    break;
+		}
+	    }
+	}
+	NodeTable res =new NodeTable();
+	if(tables.size()==1){		//if we finished to eliminate all the tables beside the one of the query  
+	    res = tables.get(0);
+	}else{				// if there are still several  tables but there are no more hidden tables
+	    NodeTable combTable =new NodeTable();
+	    while(true){
+		for(NodeTable nt : tables){	
+		    Collections.sort(tables,new factorSize());
+		    combTable = JoinTableList(tables, nt,result,q);
+		    if(combTable==null){
+			break;						
+		    }
+		    if(combTable.getEvidence().size()>2){		
+			eliminate(combTable,nt.getNodeName());
+		    }
+		    tables.add(combTable);
+
+		    break;
+		}
+		if(tables.size()==1){		//if we finished to eliminate all the tables beside the one of the query  
+		    res = tables.get(0);
+		    break;
+		}
+	    }
+	}
+	res.normalize(result);
+	for(Row row : res.getRows()){
+	    if(row.getVnodes().contains(q.getSubject())){
+		result.setPropability(row.getPropbility());
+	    }
+	}
     }
 
     /**
@@ -492,5 +596,4 @@ public class Algorithms{
 	}
     }
 }
-
 

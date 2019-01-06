@@ -1,11 +1,4 @@
-/Algorithms.class
-/CPT.class
-/Network.class
-/Node.class
-/Query.class
-/Result.class
-/Util.class
-/ValueP.class
-/Vnode.class
-/alphabeticalComparator.class
-/ex1.class
+/Algorithms$factorSize.class
+/Algorithms$alphabeticalComparator2.class
+/Algorithms$priorityBasedComparator.class
+/Algorithms$byMapOrder.class

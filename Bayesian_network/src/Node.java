@@ -110,7 +110,7 @@ public class Node{
      * @return List<Node>
      */
     private List<Node> recursive(List<Node> nodes){
-	if(! (this.getParents().size()==0)){
+	if(!(this.getParents().size()==0)){
 	    for(Node n : this.getParents()){
 		nodes.add(n);
 		n.recursive(nodes);
